@@ -231,7 +231,7 @@ function renderQuestion(){
 
 
     if(opt.moving){
-      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*50); 
+      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*100); 
       const ms = Math.floor(baseMs / gameSpeedMultiplier);
       const interval = setInterval(()=>{
         const rect = options.getBoundingClientRect();
