@@ -19,21 +19,16 @@
   .btn-quiz{min-width:160px;padding:10px 14px;font-size:16px;border-radius:8px;cursor:pointer;user-select:none}
   .btn-quick{transition:transform .05s linear}
   .status{height:28px;margin-top:14px;text-align:center;color:var(--muted)}
-  /* overlays (fake screens) */
   .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter: blur(2px)}
   .fake-screen{width:900px;height:560px;border-radius:8px;box-shadow:0 20px 80px rgba(0,0,0,.8);overflow:hidden;border:1px solid rgba(255,255,255,0.04)}
-  /* fake windows shutdown */
   .shutdown{background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace}
   .shutdown h2{font-size:28px;margin-bottom:18px}
   .shutdown .dots{font-size:18px;opacity:.8}
-  /* fake login */
   .login{background:linear-gradient(180deg,#0b1220,#08121a);display:flex;align-items:center;justify-content:center;color:#fff}
   .login-box{background:rgba(255,255,255,0.03);padding:26px;border-radius:10px;width:420px;text-align:center}
   .login-input{width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
-  /* fake terminal (hacker) */
   .terminal{background:#01060a;color:#7afca6;padding:18px;font-family:monospace;line-height:1.4;overflow:auto}
   .terminal .line{white-space:pre-wrap}
-  /* small helpers */
   .muted{color:var(--muted);font-size:13px}
   .center{display:flex;align-items:center;justify-content:center}
 </style>
@@ -44,23 +39,13 @@
       <h1 id="title">Impossible Quiz — Hardcore</h1>
       <div id="question">Carregando...</div>
       <div id="options"></div>
-      <div class="status" id="status">Nível: <span id="level">1</span> — Pegadinhas ativas</div>
+      <div class="status" id="status">Nível: <span id="level">1</span>s</div>
     </div>
   </div>
 
-  <!-- Overlays (iniciam hidden) -->
   <div id="overlayContainer" style="display:none;z-index:400"></div>
 
 <script>
-/* ---------------------------
-  Configuração das perguntas
-   - cada pergunta define pegadinhas:
-     moving (mexe-se rápido com interval),
-     vanishAfter(ms) (some em ms),
-     fontStyle (string CSS),
-     input (true -> campo),
-     trick (texto que engana)
----------------------------*/
 const quiz = [
   { q:"Qual número é maior?", opts:[
       {t:"1", correct:true, fontStyle:"font-size:64px;"},
@@ -123,7 +108,7 @@ const quiz = [
 let idx = 0;
 let overlayContainer = document.getElementById('overlayContainer');
 let movingIntervals = [];
-let gameSpeedMultiplier = 1; // aumenta com dificuldade
+let gameSpeedMultiplier = 1; 
 
 /* Utils */
 function $(id){return document.getElementById(id)}
