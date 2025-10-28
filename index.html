@@ -174,9 +174,12 @@ function renderQuestion(){
   });
 }
 
-    if(opt.vanishAfter){
-      setTimeout(()=>{ btn.style.visibility='hidden'; }, opt.vanishAfter);
-    }
+    if (opt.vanishAfter) {
+  setTimeout(() => {
+    btn.style.display = 'none';
+  }, opt.vanishAfter);
+}
+
 
     if(opt.appearOnHover){
       btn.style.visibility='hidden';
