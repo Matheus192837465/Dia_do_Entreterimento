@@ -1,3 +1,4 @@
+@@ -0,0 +1,466 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,16 +20,21 @@
   .btn-quiz{min-width:160px;padding:10px 14px;font-size:16px;border-radius:8px;cursor:pointer;user-select:none}
   .btn-quick{transition:transform .05s linear}
   .status{height:28px;margin-top:14px;text-align:center;color:var(--muted)}
+  /* overlays (fake screens) */
   .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter: blur(2px)}
   .fake-screen{width:900px;height:560px;border-radius:8px;box-shadow:0 20px 80px rgba(0,0,0,.8);overflow:hidden;border:1px solid rgba(255,255,255,0.04)}
+  /* fake windows shutdown */
   .shutdown{background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace}
   .shutdown h2{font-size:28px;margin-bottom:18px}
   .shutdown .dots{font-size:18px;opacity:.8}
+  /* fake login */
   .login{background:linear-gradient(180deg,#0b1220,#08121a);display:flex;align-items:center;justify-content:center;color:#fff}
   .login-box{background:rgba(255,255,255,0.03);padding:26px;border-radius:10px;width:420px;text-align:center}
   .login-input{width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
+  /* fake terminal (hacker) */
   .terminal{background:#01060a;color:#7afca6;padding:18px;font-family:monospace;line-height:1.4;overflow:auto}
   .terminal .line{white-space:pre-wrap}
+  /* small helpers */
   .muted{color:var(--muted);font-size:13px}
   .center{display:flex;align-items:center;justify-content:center}
 </style>
@@ -43,15 +49,25 @@
     </div>
   </div>
 
+  <!-- Overlays (iniciam hidden) -->
   <div id="overlayContainer" style="display:none;z-index:400"></div>
 
 <script>
+/* ---------------------------
+  Configuração das perguntas
+   - cada pergunta define pegadinhas:
+     moving (mexe-se rápido com interval),
+     vanishAfter(ms) (some em ms),
+     fontStyle (string CSS),
+     input (true -> campo),
+     trick (texto que engana)
+---------------------------*/
 const quiz = [
   { q:"Qual número é maior?", opts:[
       {t:"1", correct:true, fontStyle:"font-size:64px;"},
       {t:"999", correct:false, fontStyle:"font-size:18px;"},
       {t:"100", correct:false, fontStyle:"font-size:28px;"}
-    ], },
+    ], difficulty:1},
 
   { q:"Clique no botão que se mexe (boa sorte)", opts:[
       {t:"Parado", correct:false},
@@ -63,15 +79,15 @@ const quiz = [
       {t:"Errado", correct:false},
       {t:"Certo", correct:true, vanishAfter:900},
       {t:"Errado", correct:false}
-    ], },
+    ], difficulty:2},
 
-  { q:"Digite a cor do céu em um dia claro", opts:[ {t:"", correct:"azul", input:true} ], },
+  { q:"Digite a cor do céu em um dia claro", opts:[ {t:"", correct:"azul", input:true} ], difficulty:2},
 
-  { q:"Qual é o maior?", opts:[
+  { q:"qual é o maior?", opts:[
       {t:"Formiga", correct:false, fontStyle:"font-size:48px;"},
       {t:"Elefante", correct:true, fontStyle:"font-size:18px;"},
       {t:"Gato", correct:false, fontStyle:"font-size:26px;"}
-    ], },
+    ], difficulty:3},
 
 
 
@@ -79,29 +95,29 @@ const quiz = [
       {t:"Nada", correct:false},
       {t:"Revela", correct:true, appearOnHover:true},
       {t:"Falso", correct:false}
-    ], },
+    ], difficulty:3},
 
-  { q:"Digite sem Caps Lock: banana", opts:[ {t:"", correct:"banana", input:true} ], },
+  { q:"Digite sem Caps Lock: banana", opts:[ {t:"", correct:"banana", input:true} ], difficulty:3},
 
   { q:"Digite a cor do sol", opts:[
       {t:"", correct:"branco", input:true}
-    ], },
+    ], difficulty:2},
 
   { q:"Qual desses é um número primo?", opts:[
-      {t:"77", correct:false},
-      {t:"17", correct:true, moving:true},
-      {t:"9", correct:false}
-    ], difficulty:4},
+      {t:"4", correct:false},
+      {t:"7", correct:true, moving:true},
+      {t:"6", correct:false}
+    ], difficulty:3},
 
   { q:"Digite sem Caps Lock: gato", opts:[
       {t:"", correct:"gato", input:true}
-    ], },
+    ], difficulty:3},
 
   { q:"Selecione o correto", opts:[
     {t:"Errado", correct:false},
     {t:"Certo", correct:true, fontStyle:"color:transparent;", appearOnHover:true, hiddenPosition:{top:'0px', left:'0px'}},
     {t:"Errado", correct:false}
-  ], }
+  ], difficulty:4}
 
 ];
 
@@ -110,9 +126,11 @@ let overlayContainer = document.getElementById('overlayContainer');
 let movingIntervals = [];
 let gameSpeedMultiplier = 1; // aumenta com dificuldade
 
+/* Utils */
 function $(id){return document.getElementById(id)}
 function randInt(max){return Math.floor(Math.random()*max)}
 
+/* Animação no título com anime.js */
 function animateTitle(type='bounce'){
   if(type==='bounce'){
     anime({targets:'#title',translateY:[0,-8,0],scale:[1,1.05,1],duration:600,easing:'easeInOutSine'});
@@ -156,7 +174,6 @@ function renderQuestion(){
     btn.style.padding = '10px 14px';
     btn.style.borderRadius = '8px';
     btn.innerText = opt.t;
-    // estilo de fonte (pegadinha visual)
     if(opt.fontStyle) btn.style.cssText += opt.fontStyle;
 
     if(opt.appearOnHover){
@@ -214,7 +231,7 @@ function renderQuestion(){
 
 
     if(opt.moving){
-      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*100); // reduce with difficulty
+      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*100); 
       const ms = Math.floor(baseMs / gameSpeedMultiplier);
       const interval = setInterval(()=>{
         const rect = options.getBoundingClientRect();
@@ -267,7 +284,6 @@ function onWrong(){
   showFakeSequence();
 }
 
-/* Reinicia jogo */
 function restartGame(){
   idx = 0;
   clearMoving();
@@ -320,7 +336,7 @@ function showFinalRandom(){
         alert('✅ Você escolheu o botão certo! Fim do quiz.');
         restartGame();
       } else {
-        showFakeSequence(); // mostra a sequência de “erro” (shutdown, login, hacker)
+        showFakeSequence();
       }
     };
 
@@ -390,7 +406,6 @@ function showFakeTerminal(){
   let i=0;
   function typeLine(){
     if(i>=lines.length){
-      // after finish, dismiss and restart
       setTimeout(()=>{ overlayContainer.innerHTML=''; overlayContainer.style.display='none'; restartGame(); }, 1100);
       return;
     }
@@ -410,6 +425,7 @@ function showFakeTerminal(){
   }
   typeLine();
 }
+
 
 renderQuestion();
 
