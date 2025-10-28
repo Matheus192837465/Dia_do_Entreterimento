@@ -104,9 +104,9 @@ const quiz = [
     ], difficulty:2},
 
   { q:"Qual desses é um número primo?", opts:[
-      {t:"4", correct:false},
+      {t:"77", correct:false},
       {t:"7", correct:true, moving:true},
-      {t:"6", correct:false}
+      {t:"9", correct:false}
     ], difficulty:3},
 
   { q:"Digite sem Caps Lock: gato", opts:[
@@ -140,7 +140,7 @@ function animateTitle(type='bounce'){
 }
 
 function renderQuestion(){
-  clearMoving(); // limpar intervals anteriores
+  clearMoving(); 
   const q = quiz[idx];
   $('question').innerText = q.q;
   $('level').innerText = (idx+1);
@@ -231,7 +231,7 @@ function renderQuestion(){
 
 
     if(opt.moving){
-      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*100); 
+      const baseMs = Math.max(120, 600 - quiz[idx].difficulty*50); 
       const ms = Math.floor(baseMs / gameSpeedMultiplier);
       const interval = setInterval(()=>{
         const rect = options.getBoundingClientRect();
