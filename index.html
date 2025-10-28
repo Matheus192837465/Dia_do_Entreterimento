@@ -19,21 +19,16 @@
   .btn-quiz{min-width:160px;padding:10px 14px;font-size:16px;border-radius:8px;cursor:pointer;user-select:none}
   .btn-quick{transition:transform .05s linear}
   .status{height:28px;margin-top:14px;text-align:center;color:var(--muted)}
-  /* overlays (fake screens) */
   .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:300;backdrop-filter: blur(2px)}
   .fake-screen{width:900px;height:560px;border-radius:8px;box-shadow:0 20px 80px rgba(0,0,0,.8);overflow:hidden;border:1px solid rgba(255,255,255,0.04)}
-  /* fake windows shutdown */
   .shutdown{background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace}
   .shutdown h2{font-size:28px;margin-bottom:18px}
   .shutdown .dots{font-size:18px;opacity:.8}
-  /* fake login */
   .login{background:linear-gradient(180deg,#0b1220,#08121a);display:flex;align-items:center;justify-content:center;color:#fff}
   .login-box{background:rgba(255,255,255,0.03);padding:26px;border-radius:10px;width:420px;text-align:center}
   .login-input{width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff}
-  /* fake terminal (hacker) */
   .terminal{background:#01060a;color:#7afca6;padding:18px;font-family:monospace;line-height:1.4;overflow:auto}
   .terminal .line{white-space:pre-wrap}
-  /* small helpers */
   .muted{color:var(--muted);font-size:13px}
   .center{display:flex;align-items:center;justify-content:center}
 </style>
@@ -48,45 +43,35 @@
     </div>
   </div>
 
-  <!-- Overlays (iniciam hidden) -->
   <div id="overlayContainer" style="display:none;z-index:400"></div>
 
 <script>
-/* ---------------------------
-  Configuração das perguntas
-   - cada pergunta define pegadinhas:
-     moving (mexe-se rápido com interval),
-     vanishAfter(ms) (some em ms),
-     fontStyle (string CSS),
-     input (true -> campo),
-     trick (texto que engana)
----------------------------*/
 const quiz = [
   { q:"Qual número é maior?", opts:[
       {t:"1", correct:true, fontStyle:"font-size:64px;"},
       {t:"999", correct:false, fontStyle:"font-size:18px;"},
       {t:"100", correct:false, fontStyle:"font-size:28px;"}
-    ], difficulty:1},
+    ], },
 
   { q:"Clique no botão que se mexe (boa sorte)", opts:[
       {t:"Parado", correct:false},
       {t:"Móvel", correct:true, moving:true},
       {t:"Falso", correct:false}
-    ], difficulty:2},
+    ], },
 
-  { q:"Rápido: clique no botão antes que ele suma", opts:[
+  { q:"Clique no botão antes que ele suma", opts:[
       {t:"Errado", correct:false},
       {t:"Certo", correct:true, vanishAfter:900},
       {t:"Errado", correct:false}
-    ], difficulty:2},
+    ], },
 
-  { q:"Digite a cor do céu em um dia claro", opts:[ {t:"", correct:"azul", input:true} ], difficulty:2},
+  { q:"Digite a cor do céu em um dia claro", opts:[ {t:"", correct:"azul", input:true} ], },
 
-  { q:"Pegadinha de fonte: qual é o maior?", opts:[
+  { q:"Qual é o maior?", opts:[
       {t:"Formiga", correct:false, fontStyle:"font-size:48px;"},
       {t:"Elefante", correct:true, fontStyle:"font-size:18px;"},
       {t:"Gato", correct:false, fontStyle:"font-size:26px;"}
-    ], difficulty:3},
+    ], },
 
 
 
@@ -94,29 +79,29 @@ const quiz = [
       {t:"Nada", correct:false},
       {t:"Revela", correct:true, appearOnHover:true},
       {t:"Falso", correct:false}
-    ], difficulty:3},
+    ], },
 
-  { q:"Digite sem Caps Lock: banana", opts:[ {t:"", correct:"banana", input:true} ], difficulty:3},
+  { q:"Digite sem Caps Lock: banana", opts:[ {t:"", correct:"banana", input:true} ], },
 
   { q:"Digite a cor do sol", opts:[
       {t:"", correct:"branco", input:true}
-    ], difficulty:2},
+    ], },
 
   { q:"Qual desses é um número primo?", opts:[
-      {t:"4", correct:false},
-      {t:"7", correct:true, moving:true},
-      {t:"6", correct:false}
-    ], difficulty:3},
+      {t:"77", correct:false},
+      {t:"17", correct:true, moving:true},
+      {t:"9", correct:false}
+    ], },
 
   { q:"Digite sem Caps Lock: gato", opts:[
       {t:"", correct:"gato", input:true}
-    ], difficulty:3},
+    ], },
 
   { q:"Selecione o correto", opts:[
     {t:"Errado", correct:false},
     {t:"Certo", correct:true, fontStyle:"color:transparent;", appearOnHover:true, hiddenPosition:{top:'0px', left:'0px'}},
     {t:"Errado", correct:false}
-  ], difficulty:4}
+  ], }
 
 ];
 
@@ -125,11 +110,9 @@ let overlayContainer = document.getElementById('overlayContainer');
 let movingIntervals = [];
 let gameSpeedMultiplier = 1; // aumenta com dificuldade
 
-/* Utils */
 function $(id){return document.getElementById(id)}
 function randInt(max){return Math.floor(Math.random()*max)}
 
-/* Animação no título com anime.js */
 function animateTitle(type='bounce'){
   if(type==='bounce'){
     anime({targets:'#title',translateY:[0,-8,0],scale:[1,1.05,1],duration:600,easing:'easeInOutSine'});
@@ -138,7 +121,6 @@ function animateTitle(type='bounce'){
   }
 }
 
-/* Apresenta pergunta atual */
 function renderQuestion(){
   clearMoving(); // limpar intervals anteriores
   const q = quiz[idx];
@@ -191,12 +173,10 @@ function renderQuestion(){
   });
 }
 
-    // vanishAfter: some após X ms
     if(opt.vanishAfter){
       setTimeout(()=>{ btn.style.visibility='hidden'; }, opt.vanishAfter);
     }
 
-    // appearOnHover: aparece quando o container recebe hover (implementado via parent enter)
     if(opt.appearOnHover){
       btn.style.visibility='hidden';
       const parent = options;
@@ -207,7 +187,6 @@ function renderQuestion(){
     }
     if(opt.appearOnHover){
   if(opt.hiddenPosition){ 
-    // botão totalmente invisível no canto
     btn.style.position = 'absolute';
     btn.style.top = opt.hiddenPosition.top;
     btn.style.left = opt.hiddenPosition.left;
@@ -223,7 +202,6 @@ function renderQuestion(){
       btn.style.border = '';
     });
   } else {
-    // botão que aparece ao passar o mouse na área do container
     btn.style.visibility = 'hidden';
     const parent = options;
     const revealFn = function revealOnce(){
@@ -235,13 +213,10 @@ function renderQuestion(){
 }
 
 
-    // moving: mexe rápido (interval) e também foge no mouseenter
     if(opt.moving){
-      // deslocamento aleatório a cada X ms (mais rápido conforme dificuldade)
       const baseMs = Math.max(120, 600 - quiz[idx].difficulty*100); // reduce with difficulty
       const ms = Math.floor(baseMs / gameSpeedMultiplier);
       const interval = setInterval(()=>{
-        // limit boundaries inside options container
         const rect = options.getBoundingClientRect();
         const w = rect.width - 180; // leave space
         const h = rect.height - 60;
@@ -252,14 +227,12 @@ function renderQuestion(){
         btn.style.top = top+'px';
       }, ms);
       movingIntervals.push(interval);
-      // also make it jump away on hover (extra)
       btn.onmouseenter = () => {
         btn.style.transform = `translate(${(Math.random()*240-120).toFixed(0)}px,${(Math.random()*120-60).toFixed(0)}px)`;
         setTimeout(()=>btn.style.transform='translate(0,0)', 260);
       };
     }
 
-    // clique
     btn.onclick = () => {
       if(opt.correct === true){
         onCorrect();
@@ -271,33 +244,26 @@ function renderQuestion(){
     options.appendChild(btn);
   });
 
-  // Aumentar dificuldade: acelera elementos se dificuldade alta
   gameSpeedMultiplier = 1 + (quiz[idx].difficulty - 1) * 0.4;
 }
 
-/* limpa intervals de movimento */
 function clearMoving(){
   movingIntervals.forEach(i => clearInterval(i));
   movingIntervals = [];
 }
 
-/* sucesso */
 function onCorrect(){
   animateTitle('bounce');
   idx++;
   if(idx >= quiz.length){
-    // final: se último e final:true, ainda mostramos final screen com resposta aleatória
     showFinalRandom();
   } else {
-    // pequena pausa e next
     setTimeout(renderQuestion, 350);
   }
 }
 
-/* erro: mostramos sequência de telas falsas (login/shutdown/terminal) */
 function onWrong(){
   animateTitle('shake');
-  // em vez de alert, mostra overlay e simula sequência
   showFakeSequence();
 }
 
@@ -308,7 +274,6 @@ function restartGame(){
   renderQuestion();
 }
 
-/* Final real com botões aleatórios (mas aqui usamos final question as above) */
 function showFinalRandom(){
   const overlay = document.createElement('div'); 
   overlay.className = 'overlay'; 
@@ -335,13 +300,11 @@ function showFinalRandom(){
 
   const btnWrap = box.querySelector('#final-buttons');
 
-  // duas opções fixas
   const opts = [
     {t:'Finalizar'},
     {t:'Sair'}
   ];
 
-  // sorteia qual é o correto
   const correctIdx = Math.floor(Math.random() * opts.length);
 
   opts.forEach((o, i) => {
@@ -365,28 +328,23 @@ function showFinalRandom(){
   });
 }
 
-/* Sequência de telas falsas: 1) "Você perdeu" + shutdown  2) login 3) terminal 'hacker'  -> reinicia */
 function showFakeSequence(){
   clearMoving();
   overlayContainer.innerHTML = '';
   overlayContainer.style.display = 'block';
 
-  // STEP 1: fake "GAME OVER" then shutdown screen
   const ov1 = document.createElement('div'); ov1.className='overlay';
   const s1 = document.createElement('div'); s1.className='fake-screen shutdown center';
   s1.innerHTML = `<div style="text-align:center;padding:40px"><h2>GAME OVER</h2><div class="muted">Parece que você perdeu...</div><div style="height:18px"></div><div class="muted dots">Desligando . . .</div></div>`;
   ov1.appendChild(s1); overlayContainer.appendChild(ov1);
 
-  // animate dots
   let dotEl = s1.querySelector('.dots');
   let dotStage = 0;
   const dotTimer = setInterval(()=>{ dotStage = (dotStage+1)%4; dotEl.innerText = 'Desligando ' + '.'.repeat(dotStage); }, 500);
 
-  // after short time, transition to 'login' overlay
   setTimeout(()=>{
     clearInterval(dotTimer); ov1.remove();
 
-    // STEP 2: fake Windows-like login (but purely visual)
     const ov2 = document.createElement('div'); ov2.className='overlay';
     const s2 = document.createElement('div'); s2.className='fake-screen login center';
     s2.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%"><div class="login-box">
@@ -398,10 +356,8 @@ function showFakeSequence(){
     </div></div>`;
     ov2.appendChild(s2); overlayContainer.appendChild(ov2);
 
-    // clicking Enter triggers next (terminal)
     const loginBtn = s2.querySelector('#fake-login-btn');
     loginBtn.onclick = () => {
-      // small feedback
       loginBtn.innerText = 'Verificando...';
       setTimeout(()=> {
         overlayContainer.removeChild(ov2);
@@ -412,7 +368,6 @@ function showFakeSequence(){
   }, 1800);
 }
 
-/* show fake terminal hacker effect, with typing lines */
 function showFakeTerminal(){
   const ov = document.createElement('div'); ov.className='overlay';
   const s = document.createElement('div'); s.className='fake-screen terminal';
@@ -456,7 +411,6 @@ function showFakeTerminal(){
   typeLine();
 }
 
-/* Inicializa */
 renderQuestion();
 
 window.addEventListener('beforeunload', ()=>{ clearMoving(); });
